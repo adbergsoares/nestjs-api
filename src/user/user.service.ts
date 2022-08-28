@@ -14,7 +14,10 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const data: Prisma.userCreateInput = {
       ...createUserDto,
-      password: await bcrypt.hash(createUserDto.password, 10),
+      password: await bcrypt.hash(
+        createUserDto.password,
+        process.env.SALT_ROUNDS,
+      ),
     };
 
     const createdUser = await this.prisma.user.create({ data });
@@ -56,12 +59,16 @@ export class UserService {
     };
   }
 
+  findByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const data: Prisma.userUpdateInput = {
       ...updateUserDto,
       password:
         typeof updateUserDto.password !== 'undefined'
-          ? await bcrypt.hash(updateUserDto.password, 10)
+          ? await bcrypt.hash(updateUserDto.password, process.env.SALT_ROUNDS)
           : undefined,
     };
 

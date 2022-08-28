@@ -30,8 +30,10 @@ export class CreateUserDto extends User {
   @IsString()
   name: string;
 
-  @IsPhoneNumber()
   @IsOptional()
+  @Matches(/0[1-9]{2}[9]?[0-9]{8}$/, {
+    message: 'phone must be a valid phone number',
+  })
   phone: string;
 
   @IsEnum(Permission)
