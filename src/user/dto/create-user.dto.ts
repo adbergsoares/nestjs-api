@@ -1,19 +1,14 @@
 import { User } from '../entities/user.entity';
+import { Permission } from '../entities/user.permission';
 import {
   IsEmail,
   IsEnum,
   IsOptional,
-  IsPhoneNumber,
   IsString,
   Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
-
-enum Permission {
-  Admin = 'admin',
-  Standard = 'standard',
-}
 
 export class CreateUserDto extends User {
   @IsEmail()

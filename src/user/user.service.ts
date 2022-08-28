@@ -6,6 +6,8 @@ import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { UnauthorizedError } from '../auth/errors/unauthorized.error';
+import { ConflictException } from '../auth/errors/conflict.exception';
 
 @Injectable()
 export class UserService {
@@ -16,9 +18,15 @@ export class UserService {
       ...createUserDto,
       password: await bcrypt.hash(
         createUserDto.password,
-        process.env.SALT_ROUNDS,
+        +process.env.SALT_ROUNDS,
       ),
     };
+
+    if (typeof data.email !== 'undefined') {
+      if (await this.findByEmail(data.email)) {
+        throw new ConflictException('Email address is already in use.');
+      }
+    }
 
     const createdUser = await this.prisma.user.create({ data });
 
@@ -63,12 +71,26 @@ export class UserService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    currentUser: User,
+  ): Promise<User> {
+    if (currentUser.permission !== 'admin' || currentUser.id !== id) {
+      throw new UnauthorizedError('Unauthorized');
+    }
+
+    if (typeof updateUserDto.email !== 'undefined') {
+      if (await this.findByEmail(updateUserDto.email)) {
+        throw new ConflictException('Email address is already in use.');
+      }
+    }
+
     const data: Prisma.userUpdateInput = {
       ...updateUserDto,
       password:
         typeof updateUserDto.password !== 'undefined'
-          ? await bcrypt.hash(updateUserDto.password, process.env.SALT_ROUNDS)
+          ? await bcrypt.hash(updateUserDto.password, +process.env.SALT_ROUNDS)
           : undefined,
     };
 
@@ -81,5 +103,14 @@ export class UserService {
       ...updatedUser,
       password: undefined,
     };
+  }
+
+  async validateEmail(email: string): Promise<boolean> {
+    const user = await this.findByEmail(email);
+
+    if (user) {
+      return true;
+    }
+    return false;
   }
 }
