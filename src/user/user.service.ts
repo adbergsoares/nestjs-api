@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUserDto } from './dto/find-user.dto';
@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UnauthorizedError } from '../auth/errors/unauthorized.error';
 import { ConflictException } from '../auth/errors/conflict.exception';
+import { equals } from 'class-validator';
 
 @Injectable()
 export class UserService {
@@ -76,7 +77,11 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     currentUser: User,
   ): Promise<User> {
-    if (currentUser.permission !== 'admin' || currentUser.id !== id) {
+    if (Object.keys(updateUserDto).length <= 0) {
+      throw new BadRequestException();
+    }
+
+    if (currentUser.permission !== 'admin' && currentUser.id !== id) {
       throw new UnauthorizedError('Unauthorized');
     }
 
