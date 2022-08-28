@@ -1,8 +1,10 @@
 import { User } from '../entities/user.entity';
 import { Permission } from '../entities/user.permission';
 import {
+  IsAlpha,
   IsEmail,
   IsEnum,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
@@ -22,7 +24,10 @@ export class CreateUserDto extends User {
   })
   password: string;
 
+  @IsNotEmpty()
   @IsString()
+  @MinLength(2)
+  @IsAlpha()
   name: string;
 
   @IsOptional()
