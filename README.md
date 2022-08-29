@@ -45,8 +45,8 @@ $ git clone https://github.com/adbergsoares/nestjs-api
 $ cd nestjs-api
 $ cp .env.example .env
 $ npx prisma migrate dev --name init #antes de rodar este comando verifique sua configuracao com banco em .env
-npx prisma db seed #para gerar o user seed
-npm run start
+$ npx prisma db seed #para gerar o user seed
+$ npm run start
 ```
 O projeto fica disponível no IP local na porta definida em .env
 
