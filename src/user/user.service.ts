@@ -14,7 +14,10 @@ import { equals } from 'class-validator';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto, currentUser: User): Promise<User> {
+    if (currentUser.permission !== 'admin') {
+      throw new UnauthorizedError('Unauthorized');
+    }
     const data: Prisma.userCreateInput = {
       ...createUserDto,
       password: await bcrypt.hash(
@@ -37,7 +40,10 @@ export class UserService {
     };
   }
 
-  async findAll(findUserDto: FindUserDto) {
+  async findAll(findUserDto: FindUserDto, currentUser: User) {
+    if (currentUser.permission !== 'admin') {
+      throw new UnauthorizedError('Unauthorized');
+    }
     const data: Prisma.userWhereInput = {
       ...findUserDto,
       password: undefined,
@@ -57,7 +63,10 @@ export class UserService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, currentUser: User) {
+    if (currentUser.permission !== 'admin' && currentUser.id !== id) {
+      throw new UnauthorizedError('Unauthorized');
+    }
     const foundOneUser = await this.prisma.user.findUnique({
       where: { id },
     });
