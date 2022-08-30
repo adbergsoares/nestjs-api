@@ -53,9 +53,8 @@ export class UserService {
       where: data,
     });
 
-    foundAllUser.forEach(function (element, index, array) {
-      element.password = undefined;
-      array[index] = element;
+    foundAllUser.map((x) => {
+      x.password = undefined;
     });
 
     return {
