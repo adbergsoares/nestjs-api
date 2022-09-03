@@ -14,6 +14,21 @@ import { equals } from 'class-validator';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async loadSession(access_token: JSON, currentUser: User) {
+    const id = currentUser.id;
+    const foundOneUser = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    const user = {
+      ...foundOneUser,
+      password: undefined,
+    }
+    return {'token': access_token,
+    user
+      };
+  }
+
   async create(createUserDto: CreateUserDto, currentUser: User): Promise<User> {
     if (currentUser.permission !== 'admin') {
       throw new UnauthorizedError('Unauthorized');
@@ -54,12 +69,9 @@ export class UserService {
     });
 
     foundAllUser.map((x) => {
-      x.password = undefined;
     });
 
-    return {
-      foundAllUser,
-    };
+    return foundAllUser;
   }
 
   async findOne(id: number, currentUser: User) {

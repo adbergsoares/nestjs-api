@@ -10,6 +10,13 @@ import { User } from './entities/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('loadsession')
+  loadsession(@Body() access_token: JSON,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.userService.loadSession(access_token, currentUser);
+  }
+
   @Post()
   create(
     @Body() createUserDto: CreateUserDto,
