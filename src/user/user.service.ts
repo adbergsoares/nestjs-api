@@ -8,7 +8,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UnauthorizedError } from '../auth/errors/unauthorized.error';
 import { ConflictException } from '../auth/errors/conflict.exception';
-import { equals } from 'class-validator';
+import { users } from '../../prisma/users';
 
 @Injectable()
 export class UserService {
@@ -69,9 +69,14 @@ export class UserService {
     });
 
     foundAllUser.map((x) => {
+      return x.password = undefined
     });
 
-    return foundAllUser;
+    let listOfObjects = Object.keys(foundAllUser).map(function (key) {
+      return [Number(key), foundAllUser[key]]
+    })
+
+    return  foundAllUser;
   }
 
   async findOne(id: number, currentUser: User) {
